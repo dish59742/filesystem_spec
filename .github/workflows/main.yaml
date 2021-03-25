@@ -122,6 +122,6 @@ jobs:
             conda update -n base conda &&\
             conda info -a && \
             #conda activate && \
-            conda init bash -l {0} && \
+            conda init bash && \
             tox -v && \
             deactivate'
