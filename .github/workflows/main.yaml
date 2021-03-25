@@ -99,32 +99,31 @@ jobs:
           ${{ env.img }} ${{ env.py }} -m pip install -U  pip build
     - name: Install dependencies
       run: |
-            docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-            ${{ env.img }} \
-            bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
-            source .env/bin/activate && \
-            python -m pip install --upgrade pip && \
-            deactivate'
+            #docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            #${{ env.img }} \
+            #bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
+            #source .env/bin/activate && \
+            #python -m pip install --upgrade pip && \
+            #deactivate'
     - name: Test with pytest
       run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             ${{ env.img }} \
             bash -exc '\
-            source .env/bin/activate && \
-            pip install pytest setuptools wheel && \
+            #source .env/bin/activate && \
+            ${{ env.py }} -m pip install pytest setuptools wheel && \
             yum install -y wget && \
             wget -q "https://github.com/conda-forge/miniforge/releases/download/4.8.2-1/Miniforge3-4.8.2-1-Linux-aarch64.sh" -O miniconda.sh && \
             chmod +x miniconda.sh && \
             ./miniconda.sh -u -b -p $HOME/miniconda3 && \
             export PATH=$HOME/miniconda3/bin:$PATH && \
             conda config --set always_yes yes --set auto_update_conda false && \
-            conda install pip conda && \
+            conda install ${{ env.py }} -m pip conda && \
             conda update -n base conda &&\
             conda info -a && \
-            #conda activate && \
-            conda init bash && \
-            yum install -y tox && \
+            conda activate && \
+            #conda init bash && \
             ls && \
             pwd && \
-            tox -v && \
-            deactivate'
+            tox -v'
+            #deactivate'
