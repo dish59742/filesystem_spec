@@ -23,10 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
           
-      - name: Set up QEMU
-        id: qemu
-        uses: docker/setup-qemu-action@v1
-        
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -39,27 +35,6 @@ jobs:
         shell: bash -l {0}
         run: |
           tox -v
-          
-      - name: Run Tests with arm64 
-        run: |
-            docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-            ${{ env.img }} \
-            bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
-            /opt/python/${{ matrix.pyver }}/bin/python -m venv .env && \
-            source .env/bin/activate && \
-            pip install pytest setuptools wheel && \
-            yum install wget && \
-            wget -q "https://github.com/conda-forge/miniforge/releases/download/4.8.2-1/Miniforge3-4.8.2-1-Linux-aarch64.sh" -O miniconda.sh && \
-            chmod +x miniconda.sh && \
-            ./miniconda.sh -u -b -p $HOME/miniconda3 && \
-            export PATH=$HOME/miniconda3/bin:$PATH && \
-            conda config --set always_yes yes --set auto_update_conda false && \
-            conda install pip conda && \
-            conda update -n base conda &&\
-            conda info -a && \
-            conda activate && \
-            tox -v && \
-            deactivate'
 
   win:
     name: ${{ matrix.TOXENV }}-pytest-win
@@ -97,3 +72,55 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - uses: pre-commit/action@v2.0.0
+
+  test-arm64:
+    name: "Test ${{ matrix.pyver }} aarch64"
+    strategy:
+      matrix:
+        pyver: [cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      py: /opt/python/${{ matrix.pyver }}/bin/python
+      img: quay.io/pypa/manylinux2014_aarch64
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Checkout submodules
+      run: |
+        git submodule init
+        git submodule update
+    - name: Set up QEMU
+      id: qemu
+      uses: docker/setup-qemu-action@v1
+    - name: Install tools
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+          ${{ env.img }} ${{ env.py }} -m pip install -U  pip build
+    - name: Install dependencies
+      run: |
+            docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            ${{ env.img }} \
+            bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
+            source .env/bin/activate && \
+            python -m pip install --upgrade pip && \
+            deactivate'
+    - name: Test with pytest
+      run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            ${{ env.img }} \
+            bash -exc '\
+            source .env/bin/activate && \
+            pip install pytest setuptools wheel && \
+            yum install wget && \
+            wget -q "https://github.com/conda-forge/miniforge/releases/download/4.8.2-1/Miniforge3-4.8.2-1-Linux-aarch64.sh" -O miniconda.sh && \
+            chmod +x miniconda.sh && \
+            ./miniconda.sh -u -b -p $HOME/miniconda3 && \
+            export PATH=$HOME/miniconda3/bin:$PATH && \
+            conda config --set always_yes yes --set auto_update_conda false && \
+            conda install pip conda && \
+            conda update -n base conda &&\
+            conda info -a && \
+            conda activate && \
+            tox -v && \
+            deactivate'
