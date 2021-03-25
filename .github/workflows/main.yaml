@@ -46,7 +46,16 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             quay.io/pypa/manylinux2014_aarch64 \
-            bash -exc 'tox -v'
+            bash -exc 'wget -q "https://github.com/conda-forge/miniforge/releases/download/4.8.2-1/Miniforge3-4.8.2-1-Linux-aarch64.sh"  -O miniconda.sh \
+            chmod +x miniconda.sh \
+            ./miniconda.sh -u -b -p $HOME/miniconda3 \
+            export PATH=$HOME/miniconda3/bin:$PATH \
+            conda config --set always_yes yes --set auto_update_conda false \
+            conda install pip conda \
+            conda update -n base conda \
+            conda info -a \
+            conda activate \
+            tox -v'
 
   win:
     name: ${{ matrix.TOXENV }}-pytest-win
