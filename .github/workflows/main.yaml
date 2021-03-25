@@ -125,5 +125,6 @@ jobs:
             conda init bash && \
             ls && \
             pwd && \
-            tox -v'
+            ${{ env.py }} -m pip  install tox && \
+            /opt/python/${{ matrix.pyver }}/tox -v'
             #deactivate'
