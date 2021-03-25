@@ -123,5 +123,8 @@ jobs:
             conda info -a && \
             #conda activate && \
             conda init bash && \
+            yum install -y tox && \
+            ls && \
+            pwd && \
             tox -v && \
             deactivate'
