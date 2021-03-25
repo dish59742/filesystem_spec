@@ -45,7 +45,9 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             quay.io/pypa/manylinux2014_aarch64 \
-            bash -exc 'apt-get install wget \
+            bash -exc 'apt-get update \
+            && apt-get install -y wget \
+            && rm -rf /var/lib/apt/lists/* \
             wget -q "https://github.com/conda-forge/miniforge/releases/download/4.8.2-1/Miniforge3-4.8.2-1-Linux-aarch64.sh"  -O miniconda.sh \
             chmod +x miniconda.sh \
             ./miniconda.sh -u -b -p $HOME/miniconda3 \
