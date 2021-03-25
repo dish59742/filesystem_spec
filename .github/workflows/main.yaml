@@ -22,7 +22,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+          
+      - name: Set up QEMU
+        if: startsWith(matrix.os, 'ubuntu-latest')
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+        
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -35,6 +40,13 @@ jobs:
         shell: bash -l {0}
         run: |
           tox -v
+          
+      - name: Run Tests with arm64 
+        shell: bash -l {0}
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            quay.io/pypa/manylinux2014_aarch64 \
+            bash -exc 'tox -v'
 
   win:
     name: ${{ matrix.TOXENV }}-pytest-win
