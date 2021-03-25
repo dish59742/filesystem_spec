@@ -118,7 +118,7 @@ jobs:
             ./miniconda.sh -u -b -p $HOME/miniconda3 && \
             export PATH=$HOME/miniconda3/bin:$PATH && \
             conda config --set always_yes yes --set auto_update_conda false && \
-            conda install ${{ env.py }} -m pip conda && \
+            conda install pip conda && \
             conda update -n base conda &&\
             conda info -a && \
             conda activate && \
