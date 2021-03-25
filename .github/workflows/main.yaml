@@ -126,6 +126,6 @@ jobs:
             ls && \
             pwd && \
             ${{ env.py }} -m pip  install tox && \
-            /opt/python/${{ matrix.pyver }}/bin/tox -v py && \
+            /opt/python/${{ matrix.pyver }}/bin/tox -e py && \
             find / -name tox'
             #deactivate'
