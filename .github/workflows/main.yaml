@@ -121,6 +121,7 @@ jobs:
             conda install pip conda && \
             conda update -n base conda &&\
             conda info -a && \
-            conda activate && \
+            #conda activate && \
+            conda init bash -l {0} && \
             tox -v && \
             deactivate'
